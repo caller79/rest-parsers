@@ -1,6 +1,7 @@
 package caller79.numericrange;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,12 +19,21 @@ public class MultipleNumericRange {
         return ranges != null && ranges.stream().anyMatch(numericRange -> numericRange.overlaps(range));
     }
 
-    MultipleNumericRange join(MultipleNumericRange... others) {
+    public boolean overlaps(MultipleNumericRange range) {
+        return ranges != null && ranges.stream().anyMatch(numericRange -> {
+            if (range.getRanges() == null) {
+                return false;
+            }
+            return range.getRanges().stream().anyMatch(nr -> nr.overlaps(numericRange));
+        });
+    }
+
+    public MultipleNumericRange join(MultipleNumericRange... others) {
         List<NumericRange> resultingRanges = new ArrayList<>(ranges);
         for (MultipleNumericRange other : others) {
             resultingRanges.addAll(other.ranges);
         }
-        return MultipleNumericRange.builder().ranges(resultingRanges).build();
+        return MultipleNumericRange.builder().ranges(Collections.unmodifiableList(resultingRanges)).build();
     }
 
     @Override

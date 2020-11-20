@@ -15,6 +15,20 @@ public class NumericRangeFactory {
     public static final String MULTIPLE_NUMERIC_RANGE_REGEXP = "^(?<ranges>" + NUMERIC_RANGE_REGEXP + ")+$";
     public static final Pattern MULTIPLE_NUMERIC_RANGE_PATTERN = Pattern.compile(MULTIPLE_NUMERIC_RANGE_REGEXP);
 
+    /**
+     * Parse an expression in the form of multiple individual ranges, where every range has the form
+     * <ul>
+     * <li>Opening sign, either [ or (</li>
+     * <li>Optional start of range, a text which can be understood by Double.parseDouble()</li>
+     * <li>Comma separator</li>
+     * <li>Optional end of range, a text which can be understood by Double.parseDouble()</li>
+     * <li>Closing sign, either ) or ]</li>
+     * </ul>
+     * For example: (,0)][1,2](3,4)[5,6)(7,8]
+     * @param textRepresentation An expression like "(,0)][1,2](3,4)[5,6)(7,8]"
+     * @return a MultipleNumericRange which allows to operate with the numeric range expression
+     * @throws IllegalArgumentException if the textRepresentation does not represent a correct multiple numeric range expression.
+     */
     public MultipleNumericRange parse(String textRepresentation) {
         Matcher matcher = MULTIPLE_NUMERIC_RANGE_PATTERN.matcher(textRepresentation);
         if (matcher.matches()) {
