@@ -24,7 +24,7 @@ public class NumericRangeWrapper {
 
     private MultipleNumericRange wrapSorted(List<? extends Number> numbers, int maxExpressions, boolean discreteNumbers) {
         if (numbers.isEmpty()) {
-            return MultipleNumericRange.builder().ranges(Collections.singletonList(new NumericRangeImpl(0, 0, false, false))).build();
+            return MultipleNumericRange.builder().ranges(Collections.singletonList(new NumericRange(0, 0, false, false))).build();
         }
         MultipleNumericRange allItemsRange = withAllIndividualItems(numbers, discreteNumbers);
         if (allItemsRange.getRanges()
@@ -39,7 +39,7 @@ public class NumericRangeWrapper {
             return allItemsRange;
         }
         if (maxExpressions <= 1) {
-            return MultipleNumericRange.builder().ranges(Collections.singletonList(NumericRangeImpl.builder()
+            return MultipleNumericRange.builder().ranges(Collections.singletonList(NumericRange.builder()
                 .startIncluded(true)
                 .endIncluded(true)
                 .start(numbers.get(0))
@@ -86,17 +86,17 @@ public class NumericRangeWrapper {
                     if (number.longValue() == next.longValue() + 1) {
                         next = number;
                     } else {
-                        ranges.add(NumericRangeImpl.builder().startIncluded(true).endIncluded(true).start(current).end(next).build());
+                        ranges.add(NumericRange.builder().startIncluded(true).endIncluded(true).start(current).end(next).build());
                         current = number;
                         next = number;
                     }
                 }
             }
-            ranges.add(NumericRangeImpl.builder().startIncluded(true).endIncluded(true).start(current).end(next).build());
+            ranges.add(NumericRange.builder().startIncluded(true).endIncluded(true).start(current).end(next).build());
             return MultipleNumericRange.builder().ranges(ranges).build();
         } else {
             return MultipleNumericRange.builder()
-                .ranges(numbers.stream().map((Function<Number, NumericRange>) number -> NumericRangeImpl.builder().startIncluded(true).endIncluded(true).start(number).end(number).build()).collect(Collectors.toList()))
+                .ranges(numbers.stream().map((Function<Number, NumericRange>) number -> NumericRange.builder().startIncluded(true).endIncluded(true).start(number).end(number).build()).collect(Collectors.toList()))
                 .build();
         }
     }

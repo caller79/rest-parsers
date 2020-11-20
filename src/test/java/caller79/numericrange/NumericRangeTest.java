@@ -10,22 +10,22 @@ public class NumericRangeTest {
 
     @Test
     public void testRangeOverlappingWithoutNulls() {
-        NumericRange baseRange = NumericRangeImpl.builder()
+        NumericRange baseRange = NumericRange.builder()
             .start(10d)
             .end(20d)
             .startIncluded(true)
             .endIncluded(true).build();
 
         List<NumericRange> overlapping = Arrays.asList(
-            NumericRangeImpl.builder()
+            NumericRange.builder()
                 .start(9d).end(10d)
                 .startIncluded(true).endIncluded(true)
                 .build(),
-            NumericRangeImpl.builder()
+            NumericRange.builder()
                 .start(19d).end(30d)
                 .startIncluded(true).endIncluded(true)
                 .build(),
-            NumericRangeImpl.builder()
+            NumericRange.builder()
                 .start(20d).end(30d)
                 .startIncluded(true).endIncluded(true)
                 .build()
@@ -37,11 +37,11 @@ public class NumericRangeTest {
         }
 
         List<NumericRange> nonOverlapping = Arrays.asList(
-            NumericRangeImpl.builder()
+            NumericRange.builder()
                 .start(9d).end(10d)
                 .startIncluded(true).endIncluded(false)
                 .build(),
-            NumericRangeImpl.builder()
+            NumericRange.builder()
                 .start(20d).end(30d)
                 .startIncluded(false).endIncluded(true)
                 .build()
@@ -54,25 +54,25 @@ public class NumericRangeTest {
 
     @Test
     public void testRangeOverlappingWithNulls() {
-        NumericRange baseRangeNN = NumericRangeImpl.builder()
+        NumericRange baseRangeNN = NumericRange.builder()
             .start(null)
             .end(null)
             .startIncluded(true)
             .endIncluded(true).build();
 
-        NumericRange baseRangeNV = NumericRangeImpl.builder()
+        NumericRange baseRangeNV = NumericRange.builder()
             .start(null)
             .end(1d)
             .startIncluded(true)
             .endIncluded(true).build();
 
-        NumericRange baseRangeVN = NumericRangeImpl.builder()
+        NumericRange baseRangeVN = NumericRange.builder()
             .start(2d)
             .end(null)
             .startIncluded(true)
             .endIncluded(true).build();
 
-        NumericRange baseRangeVV = NumericRangeImpl.builder()
+        NumericRange baseRangeVV = NumericRange.builder()
             .start(0d)
             .end(1d)
             .startIncluded(true)

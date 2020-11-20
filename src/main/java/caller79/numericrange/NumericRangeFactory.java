@@ -60,7 +60,7 @@ public class NumericRangeFactory {
             if (StringUtils.isNotEmpty(numbers[1])) {
                 end = Double.parseDouble(numbers[1]);
             }
-            return NumericRangeImpl.builder()
+            return NumericRange.builder()
                 .startIncluded(startIncluded)
                 .endIncluded(endIncluded)
                 .start(start)
