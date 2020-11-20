@@ -34,8 +34,8 @@ class RelativeDateRangeFactor implements DateRangeFactor {
     }
 
     @Override
-    public Instant getRepresentedUTCDate() {
-        return now.plus(amount, chronoUnit);
+    public Instant getRepresentedDate(ZoneId zoneId) {
+        return getLocalDateTime(now.atZone(zoneId).toLocalDateTime(), zoneId).toInstant(zoneId.getRules().getOffset(now));
     }
 
     @Override

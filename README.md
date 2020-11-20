@@ -20,8 +20,6 @@ For example, absolute dates can be expressed as:
 * yyyy-MM-dd hh:mm:ss, for example 2019-02-23 00:30:00 
 * yyyy-MM-dd, which is equivalent to yyyy-MM-dd 00:00:00
 
-Absolute dates are considered to be in UTC for calculation purposes.
-
 Relative dates can be expressed as:
 * [number]m, for example 3m (meaning 3 minutes from now) or -3d (meaning 3 minutes ago)
 * [number]h, for example 3h (meaning 3 hours from now) or -3d (meaning 3 hours ago)
@@ -44,18 +42,44 @@ The class is agnostic of timezones, unless for the methods that assume UTC.
 A DateRange object can be obtained from an expression by parsing it:
 ```
 DateRangeFactory dateRangeFactory = DateRangeFactory.builder().build();
- // Can be customized specifying what is "now", otherwise uses current timestamp. Notice this is "frozen" at the moment of the DateRangeFactory creation. 
+// Can be customized specifying what is "now", otherwise uses current timestamp. 
+// Notice this is "frozen" at the moment of the DateRangeFactory creation and used in all subsequent operations. 
 
 DateRange range = dateRangeFactory.parseRange("0,30d");
 
-Instant start = range.getUTCStart(); // Returns now (the moment where the dateRangeFactory was created) in UTC, which can be converted to any other timezone easily. 
-Instant end = range.getUTCEnd(); // Returns now (the moment where the dateRangeFactory was created) + 30 days in UTC, which can be converted to any other timezone easily.
+Instant start = range.getStart(ZoneId.of("UTC")); // Returns now (the moment where the dateRangeFactory was created) in UTC. 
+Instant end = range.getEnd(ZoneId.of("UTC")); // Returns now (the moment where the dateRangeFactory was created) + 30 days in UTC.
+```
+Operations range.contains() and range.overlaps() can be used to determine if this range includes a specific moment in time or overlaps it.
 
-// range.contains() and range.intersects() can be used to determine if this range includes a specific moment in time.
+Suppose we have an event that starts in Chicago on 2021-02-22 19:28:00  
+```
+LocalDateTime eventDate = LocalDateTime.of(2021, 2, 22, 19, 28, 0);
+```
+Is this event happening in the next 30 days?
+```
+dateRangeFactory.parseRange("0,30d").contains(eventDate, ZoneId.of("America/Chicago"));
+```
+Is this event happening today, so I can still go?
+```
+dateRangeFactory.parseRange("0,1d|").contains(eventDate, ZoneId.of("America/Chicago"));
+```
+Is this event happening today, so I can still go, considering I am 1h away from there? In other words, is it starting at least 1h from now and is it today?
+```
+dateRangeFactory.parseRange("1h,1d|").contains(eventDate, ZoneId.of("America/Chicago"));
+``` 
 
- 
+Christmas day 2021 is represented as "2021-12-25,2021-12-26". An event is starting in Tokyo now and it will last for 2 hours. 
+```
+DateRange christmas = dateRangeFactory.parseRange("2021-12-25,2021-12-26")
+DateRange eventRange = dateRangeFactory.parseRange("0,2h")
 
+ZoneId eventTimezone = ZoneId.of("Asia/Tokyo");
+LocalDateTime eventStart = eventRange.getStart(eventTimezone).atZone(eventTimezone).toLocalDateTime();
+LocalDateTime eventEnd = eventRange.getEnd(eventTimezone).atZone(eventTimezone).toLocalDateTime();
 
+// Does this event, or part of it, happen during christmas day?
+christmas.overlaps(eventStart, eventEnd, eventTimezone);
 ``` 
 
 
@@ -129,8 +153,3 @@ try {
     // Respond with a 400 error.
 }
 ```
-
-
-
- 
-

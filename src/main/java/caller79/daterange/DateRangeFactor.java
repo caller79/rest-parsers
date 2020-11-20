@@ -12,5 +12,5 @@ interface DateRangeFactor {
 
     boolean isAfter(LocalDateTime date, ZoneId zoneId);
 
-    Instant getRepresentedUTCDate();
+    Instant getRepresentedDate(ZoneId zoneId);
 }

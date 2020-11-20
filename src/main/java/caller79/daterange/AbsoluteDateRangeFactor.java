@@ -11,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 @lombok.RequiredArgsConstructor
 @lombok.Builder
 class AbsoluteDateRangeFactor implements DateRangeFactor {
-    public static final ZoneId UTC = ZoneId.of("UTC");
     private final LocalDateTime dateTime;
 
     @Override
@@ -25,8 +24,8 @@ class AbsoluteDateRangeFactor implements DateRangeFactor {
     }
 
     @Override
-    public Instant getRepresentedUTCDate() {
-        return dateTime.atZone(UTC).toInstant();
+    public Instant getRepresentedDate(ZoneId zoneId) {
+        return dateTime.atZone(zoneId).toInstant();
     }
 
     @Override

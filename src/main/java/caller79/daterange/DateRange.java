@@ -10,9 +10,9 @@ import java.time.ZoneId;
 public interface DateRange {
     boolean contains(LocalDateTime date, ZoneId zoneId);
 
-    boolean intersects(LocalDateTime startDate, LocalDateTime endDate, ZoneId zoneId);
+    boolean overlaps(LocalDateTime startDate, LocalDateTime endDate, ZoneId zoneId);
 
-    Instant getUTCStart();
+    Instant getStart(ZoneId zoneId);
 
-    Instant getUTCEnd();
+    Instant getEnd(ZoneId zoneId);
 }

@@ -19,20 +19,20 @@ class TwoFactorDateRange implements DateRange {
     }
 
     @Override
-    public boolean intersects(LocalDateTime startDate, LocalDateTime endDate, ZoneId zoneId) {
+    public boolean overlaps(LocalDateTime startDate, LocalDateTime endDate, ZoneId zoneId) {
         LocalDateTime start = startDate == null ? LocalDateTime.MIN : startDate;
         LocalDateTime end = endDate == null ? LocalDateTime.MAX : endDate;
         return (to == null || !to.isBefore(start, zoneId)) && (from == null || !from.isAfter(end, zoneId));
     }
 
     @Override
-    public Instant getUTCStart() {
-        return from == null ? null : from.getRepresentedUTCDate();
+    public Instant getStart(ZoneId zoneId) {
+        return from == null ? null : from.getRepresentedDate(zoneId);
     }
 
     @Override
-    public Instant getUTCEnd() {
-        return to == null ? null : to.getRepresentedUTCDate();
+    public Instant getEnd(ZoneId zoneId) {
+        return to == null ? null : to.getRepresentedDate(zoneId);
     }
 
     @Override
