@@ -14,7 +14,50 @@ This library provides some useful parsers to help constructing powerful REST API
 
 ### Date range parser
 
-To be implemented...
+Parse a date range expression into a DateRange object which can be used to construct queries, calculate intervals, etc.
+A date range expression is a combination of up to two date "moments", where every moment can be specified as an absolute or relative date.
+For example, absolute dates can be expressed as:
+* yyyy-MM-dd hh:mm:ss, for example 2019-02-23 00:30:00 
+* yyyy-MM-dd, which is equivalent to yyyy-MM-dd 00:00:00
+
+Absolute dates are considered to be in UTC for calculation purposes.
+
+Relative dates can be expressed as:
+* [number]m, for example 3m (meaning 3 minutes from now) or -3d (meaning 3 minutes ago)
+* [number]h, for example 3h (meaning 3 hours from now) or -3d (meaning 3 hours ago)
+* [number]d, for example 3d (meaning 3 days from now) or -3d (meaning 3 days ago)
+
+The default relative unit, if omitted is "d", for days.
+
+Relative dates can be truncated by adding character | at the end, for example 
+* [number]m|, for example 3m| (meaning 3 minutes from now, rounded to the second. If now it is 16:58 with 15 seconds, "3m|" means 17:01:00 while "3m" means 17:01:15
+* [number]h|, for example 3h| (meaning 3 hours from now, rounded to the second. If now it is 16:58 with 15 seconds, "3h|" means 19:00:00 while "3m" means 19:58:15
+* [number]d|, for example 1d| (meaning 1 days from now, rounded to the second, in other words, the end of the day). If now it is Feb 23rd, "1d|" means Feb 24th at 00:00:00, no matter the time of the day it is.  
+
+Ranges are formed by combining two date "moments", comma separated. For example:
+* 0,1d| Represents the date interval between "now" and the end of the day.
+* -7,0  Represents the last 7 days
+* 1979-02-23 00:30:00,0 Represents the date interval between I was born and now.
+
+The class is agnostic of timezones, unless for the methods that assume UTC.
+
+A DateRange object can be obtained from an expression by parsing it:
+```
+DateRangeFactory dateRangeFactory = DateRangeFactory.builder().build();
+ // Can be customized specifying what is "now", otherwise uses current timestamp. Notice this is "frozen" at the moment of the DateRangeFactory creation. 
+
+DateRange range = dateRangeFactory.parseRange("0,30d");
+
+Instant start = range.getUTCStart(); // Returns now (the moment where the dateRangeFactory was created) in UTC, which can be converted to any other timezone easily. 
+Instant end = range.getUTCEnd(); // Returns now (the moment where the dateRangeFactory was created) + 30 days in UTC, which can be converted to any other timezone easily.
+
+// range.contains() and range.intersects() can be used to determine if this range includes a specific moment in time.
+
+ 
+
+
+``` 
+
 
 
 ### Numeric range parser
