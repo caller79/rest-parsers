@@ -1,5 +1,5 @@
-# rest-parsers
-Some simple java parsers to make REST APIs powerful and concise
+# rest-utils
+Some simple java utils to make REST APIs powerful and concise
 
 ## Introduction
 This library provides some useful parsers to help constructing powerful REST APIs. If you are trying to solve something similar to the following problems, you may find it useful:
@@ -8,7 +8,7 @@ This library provides some useful parsers to help constructing powerful REST API
     * All items created in the last 7 days.
     * All items which will be unpublished today.
     * All items created yesterday.
-
+* I have contents in a database which I want to modify via APIs. There are multiple frontends updating my objects, with different forms and capabilities.
 
 ## Utilities included
 
@@ -180,3 +180,7 @@ try {
 }
 ```
 
+
+### Property setters
+
+Set properties to beans using a generic multi-purpose representation of the properties to set.  
