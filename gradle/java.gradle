@@ -1,0 +1,15 @@
+apply plugin: 'java'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.withType(Javadoc).all { enabled = false }
+
+jar {
+    enabled = true
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}

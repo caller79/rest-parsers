@@ -1,0 +1,8 @@
+apply plugin: 'pmd'
+
+pmd {
+    toolVersion "6.11.0"
+    ruleSets = []
+    ruleSetConfig = resources.text.fromFile("gradle/pmdRules.xml")
+    ignoreFailures = false
+}
