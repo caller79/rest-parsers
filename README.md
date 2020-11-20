@@ -1,11 +1,25 @@
 # rest-parsers
 Some simple java parsers to make REST APIs powerful and concise
 
+## Introduction
+This library provides some useful parsers to help constructing powerful REST APIs. If you are trying to solve something similar to the following problems, you may find it useful:
+* I store products in a database and want to offer an API to the frontends so they can read them by price ranges.
+* I have a table of contents of whatever kind and want to offer an API so they can be read by date, with plenty of flexibility, such as.
+    * All items created in the last 7 days.
+    * All items which will be unpublished today.
+    * All items created yesterday.
+
+
 ## Utilities included
+
+### Date range parser
+
+To be implemented...
+
 
 ### Numeric range parser
 
-Parse a numeric range expression into an object which can be used to construct a Predicate or an SQL clause, or compared with .
+Parse a numeric range expression into an object which can be used to construct a Predicate or an SQL clause, or compared with others.
 
 `MultipleNumericRange range = new NumericRangeFactory().getRangeFrom(String range)`
 
