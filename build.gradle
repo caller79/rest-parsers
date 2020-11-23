@@ -10,6 +10,7 @@ buildscript {
 
 plugins {
     id 'com.github.spotbugs' version '4.0.0' apply false
+    id 'maven-publish'
 }
 
 apply from: "$rootProject.projectDir/gradle/tasks.gradle"
