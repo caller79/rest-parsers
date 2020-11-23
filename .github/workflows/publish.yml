@@ -21,7 +21,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add gradle.properties
-          git commit -m "Closed release `./scripts/version/getVersion.sh`"
+          git commit -m "WF - Closed release `./scripts/version/getVersion.sh`"
       - name: Publish package
         run: chmod +x gradlew && ./gradlew clean check test build publish
         env:
@@ -30,7 +30,7 @@ jobs:
         run: |
           ./scripts/version/increaseVersion.sh
           git add gradle.properties
-          git commit -m "Created new snapshot version `./scripts/version/getVersion.sh`"
+          git commit -m "WF - Created new snapshot version `./scripts/version/getVersion.sh`"
       - name: Git push version
         uses: ad-m/github-push-action@v0.6.0
         with:
