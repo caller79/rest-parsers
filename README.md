@@ -26,7 +26,7 @@ If you are trying to solve something similar to the following problems, you may 
 
 Parse a numeric range expression into an object which can be used to construct a Predicate or an SQL clause, or compared with others.
 
-`MultipleNumericRange range = new NumericRangeFactory().getRangeFrom(String range)`
+`MultipleNumericRange range = new NumericRangeFactory().parse(String range)`
 
 Example:
 
