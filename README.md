@@ -183,4 +183,66 @@ try {
 
 ### Property setters
 
-Set properties to beans using a generic multi-purpose representation of the properties to set.  
+Set properties to beans using a generic multi-purpose representation of the properties to set. This can be used to
+implement write endpoints in APIs which are flexible with the changes in the datamodel underneath and also flexible
+with different frontend requirements.
+
+This library facilitates the implementation of APIs like
+
+```
+POST /api/contents/     # Create content 
+```
+or
+```
+PUT /api/contents/<id>  # Update content by id
+```
+
+passing in the body a generic, flexible, multi-purpose representation of the content object to create / update like:
+
+```
+{
+  "properties": [
+    {
+      "name": "string",
+      "value": {}
+    }
+  ]
+}
+```
+
+This approach is flexible in the sense that:
+1. Different frontends can pass different properties, and the backend is only responsible for updating the properties passed.
+2. You can clearly distinguish the scenario where a property must be set to null from the scenario where a property needs to be left intact. Java frameworks like Jackson do not make it easy to clearly distinguish the case where a property in a JSON is missing or is set to null explicitly. 
+3. Nested objects can be handled cleanly, using the same representation, for example, if only one attribute of the nested object needs to be updated.
+
+The library provides the following utilities:
+1. PropertiesUpdateRequest class. Provides a DTO representation for a property update request.
+2. PropertySettingHelper class. Utility to take a PropertyUpdateRequest and use it to modify an existing object.
+3. Annotations (SetteableFromPropertyRequest, ...) to customize how properties are set to objects.
+4. PropertySetter's. Even though the library provides setters that understand multiple types such as primitives, nested objects, lists of nested objects, etc.
+you can also write your own.
+
+Example of use:
+
+
+Read the incoming PropertiesUpdateRequest from the body of an HTTP request. The exact details are outside the scope of this library, but PropertiesUpdateRequest is a POJO easily serializable from/to JSON or XML format. 
+```
+PropertiesUpdateRequest updateRequest = ...[getBodyFromRequest]...;
+```
+Read the object to modify from persistence, for example with Hibernate. Again, this is outside the scope of this library. The MyBean class must be annotated with @SetteableFromPropertyRequest in order to define what properties are setteable and how.
+
+```
+MyBean bean = ...[readFromPersistence(id)]... 
+```
+
+Create the property setting helper, optionally with an initializer (so you can, for example, autowire your implementations of PropertySetters)
+```
+PropertySettingHelper<MyBean> helper = new PropertySettingHelper<>([initializer], [options]); 
+```
+
+Apply properties from the incoming request into the object.
+
+```
+helper.applyProperties(bean, updateRequest.getProperties());
+```
+Validate or persist the resulting object, with hibernate, for example. The PropertiesUpdateRequest could also be validated prior to setting the properties. Basic type validation is already provided out of the box.
