@@ -217,7 +217,7 @@ passing in the body a generic, flexible, multi-purpose representation of the con
 ```
 
 This approach is flexible in the sense that:
-1. Different frontends can pass different properties, and the backend is only responsible for updating the properties passed.
+1. Different frontends can pass different properties, and the backend is responsible for updating the properties passed, leaving the rest intact.
 2. You can clearly distinguish the scenario where a property must be set to null from the scenario where a property needs to be left intact. Java frameworks like Jackson do not make it easy to clearly distinguish the case where a property in a JSON is missing or is set to null explicitly. 
 3. Nested objects can be handled cleanly, using the same representation, for example, if only one attribute of the nested object needs to be updated.
 
@@ -240,6 +240,43 @@ Read the object to modify from persistence, for example with Hibernate. Again, t
 ```
 MyBean bean = ...[readFromPersistence(id)]... 
 ```
+
+The MyBean class is annotated appropriately, in order to customize what exactly can be set:
+
+```
+    @lombok.Data
+    @SetteableVirtualProperties(properties = {@SetteableFromPropertyRequest(name = "vprop1", setter = DynamicVirtualPropertySetter.class), @SetteableFromPropertyRequest(name = "vprop2", setter = DynamicVirtualPropertySetter.class)})
+    public static class MyBean {
+        @SetteableFromPropertyRequest
+        private String name;
+        @SetteableFromPropertyRequest
+        private Integer count;
+        @SetteableFromPropertyRequest
+        private BigDecimal weight;
+        @SetteableFromPropertyRequest
+        private Date startDate;
+        @SetteableFromPropertyRequest
+        private LocalDateTime startDateTime;
+        @SetteableFromPropertyRequest
+        private Boolean valid;
+        @SetteableFromPropertyRequest(setter = NestedObjectPropertySetter.class)
+        private MyNestedBean nested;
+        @SetteableFromPropertyRequest
+        private MyEnum myEnum;
+
+        @SetteableFromPropertyRequest(priority = 1)
+        private String field1 = "";
+        @SetteableFromPropertyRequest(priority = 2)
+        private String field2 = "";
+        @SetteableFromPropertyRequest(priority = 3)
+        private String field3 = "";
+    }
+```
+Notice the following:
+* Setteable attributes in the object are annotated with @SetteableFromPropertyRequest. You could also annotate at class level and exclude individual fields with @SetteableFromPropertyRequest(ignore=true) if it is easier.
+* An optional "setter" attribute can be passed to @SetteableFromPropertyRequest() with a custom implementation of the ItemPropertySetter parent class.
+* An optional "priority" attribute can be passed to @SetteableFromPropertyRequest() in case we want properties to be written in a specific order.
+* An optional @SetteableVirtualProperties can be defined at class level to "invent" properties which do not exist in the object and provide a custom setter that performs whatever logic. For example, saving things in an external system, applying transformations to the incoming data before saving it to the real property (password encryption, for example), etc.
 
 Create the property setting helper, optionally with an initializer (so you can, for example, autowire your implementations of PropertySetters)
 ```
