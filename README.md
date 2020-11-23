@@ -10,9 +10,11 @@ Some simple java utils to make REST APIs powerful and concise
 
 
 ## Introduction <a name="introduction"></a>
-This library provides some useful parsers to help constructing powerful REST APIs. If you are trying to solve something similar to the following problems, you may find it useful:
-* I store products in a database and want to offer an API to the frontends so they can read them by price ranges.
-* I have a table of contents of whatever kind and want to offer an API so they can be read by date, with plenty of flexibility, such as.
+This library provides some useful parsers and classes to help constructing powerful REST APIs. They do not constitute a complete framework or enforce using a specific technology. They have been used and tested with Spring Rest but could potentially work with any other Java Backend technologies.   
+ 
+If you are trying to solve something similar to the following problems, you may find this library useful:
+* I store products in a database and want to offer an API to the frontends so they can read them by numeric ranges (such as by price, id, dimensions, weight, ...) with great flexibility.
+* I have a database with contents of whatever kind and want to offer an API so they can be read by date, with plenty of flexibility, such as.
     * All items created in the last 7 days.
     * All items which will be unpublished today.
     * All items created yesterday.
