@@ -1,3 +1,10 @@
+apply plugin: "maven-publish"
+
+task sourceJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allJava
+}
+
 publishing {
     repositories {
         maven {
