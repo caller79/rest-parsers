@@ -1,7 +1,15 @@
 # rest-utils
 Some simple java utils to make REST APIs powerful and concise
 
-## Introduction
+# Table of contents
+1. [Introduction](#introduction)
+2. [Utilities included](#utilities-included)
+    1. [Numeric range parser](#numeric-range-parser) 
+    2. [Date range parser](#date-range-parser) 
+    3. [Property setters](#property-setters) 
+
+
+## Introduction <a name="introduction"></a>
 This library provides some useful parsers to help constructing powerful REST APIs. If you are trying to solve something similar to the following problems, you may find it useful:
 * I store products in a database and want to offer an API to the frontends so they can read them by price ranges.
 * I have a table of contents of whatever kind and want to offer an API so they can be read by date, with plenty of flexibility, such as.
@@ -10,10 +18,9 @@ This library provides some useful parsers to help constructing powerful REST API
     * All items created yesterday.
 * I have contents in a database which I want to modify via APIs. There are multiple frontends updating my objects, with different forms and capabilities.
 
-## Utilities included
+## Utilities included <a name="utilities-included"></a>
 
-
-### Numeric range parser
+### Numeric range parser <a name="numeric-range-parser"></a>
 
 Parse a numeric range expression into an object which can be used to construct a Predicate or an SQL clause, or compared with others.
 
@@ -83,8 +90,7 @@ try {
 }
 ```
 
-
-### Date range parser
+### Date range parser <a name="date-range-parser"></a>
 
 Parse a date range expression into a DateRange object which can be used to construct queries, calculate intervals, etc.
 A date range expression is a combination of up to two date "moments", where every moment can be specified as an absolute or relative date.
@@ -181,7 +187,7 @@ try {
 ```
 
 
-### Property setters
+### Property setters <a name="property-setters"></a>
 
 Set properties to beans using a generic multi-purpose representation of the properties to set. This can be used to
 implement write endpoints in APIs which are flexible with the changes in the datamodel underneath and also flexible
