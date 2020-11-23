@@ -24,7 +24,7 @@ If you are trying to solve something similar to the following problems, you may 
 
 ### Numeric range parser <a name="numeric-range-parser"></a>
 
-Parse a numeric range expression into an object which can be used to construct a Predicate or an SQL clause, or compared with others.
+Parse a numeric range expression into an object which can be used to construct a Predicate, an SQL clause, or programmatically processed.
 
 `MultipleNumericRange range = new NumericRangeFactory().parse(String range)`
 
@@ -73,11 +73,11 @@ Your API may look like:
 
 ` /api/products?fromPrice=<xxx>&toPrice=<yyy>`
 
-This only allows an interval and all the validations, parsing and translation into SQL needs to be done. Instead, you may define your API as
+This only allows one interval and all the validations, parsing and translation into SQL needs to be done. Instead, you may define your API as
 
 ` /api/products?priceRange=<zzz>`
 
-And allow a numeric range to be passed, such as [0,1000) for products with a price less than 1000 or [0,100)(500,600) for products between 0 and 100 (exclusive) or between 500 and 600 (both excluded) . Validation, parsing and conversion are handled by NumericRangeFactory:
+And allow a numeric range to be passed, such as [0,1000) for products with a price less than 1000 or [0,100)(500,600) for products between 0 and 100 (exclusive) or between 500 and 600 (both excluded). Validation, parsing and conversion are handled by NumericRangeFactory:
 
 ```
 NumericRangeFactory factory = new NumericRangeFactory();
@@ -87,6 +87,7 @@ try {
              + range.toString(MultipleNumericRange.ToStringCustomizer.sqlCustomizer("products.price"))
     // This produces a safe query with all the clauses that the range defines:
     // select * from products where (products.price>=0 AND products.price<1000) OR (products.price>500 AND products.price<600) 
+	// SQL conversion is included, other conversors may be easily implemented.
 } catch (IllegalArgumentException iae) {
     // Respond with a 400 error.
 }
@@ -104,9 +105,9 @@ If a query had to be made to a database, getting only items whose id is in the o
 
 For example:
 ```
-// Obtain list of ID's from an external system
+// Obtain list of ID's from an external system such as SOLR, an API call, etc.
 List<Long> ids = ... 
-//The resulting list contains 1000 id's like, for example
+//The resulting list contains 1000 id's, for example
 [1,2,3,4,5...500,502,503, ... 1000,1010]
 
 // Wrap the original list in a range, allowing for the multiple range to contain up to 1000 individual ranges.
@@ -116,8 +117,8 @@ MultipleNumericRange range = numericRangeWrapper.wrapDiscrete(list, NumericRange
 
 if (range.getRanges().size() < ids.size()) {
     String rangeAsSQLClause = range.toString(MultipleNumericRange.ToStringCustomizer.sqlCustomizer("x"));
-    # rangeAsSQLClause value is now "(x>=1 AND x<=500) OR (x>=502 AND x<=1000) OR (x=1010)"
-    # This is more compact and efficient than an "in" clause with 1000 id's.
+    // rangeAsSQLClause value is now "(x>=1 AND x<=500) OR (x>=502 AND x<=1000) OR (x=1010)"
+    // This is more compact and efficient than an "in" clause with 1000 id's.
 }
 else {
     // The original list of id's expressed as a range is not much simpler than the list of id's.
@@ -148,15 +149,15 @@ The default relative unit, if omitted is "d", for days.
 
 Relative dates can be truncated by adding character | at the end, for example 
 * [number]m|, for example 3m| (meaning 3 minutes from now, rounded to the second. If now it is 16:58 with 15 seconds, "3m|" means 17:01:00 while "3m" means 17:01:15
-* [number]h|, for example 3h| (meaning 3 hours from now, rounded to the second. If now it is 16:58 with 15 seconds, "3h|" means 19:00:00 while "3m" means 19:58:15
-* [number]d|, for example 1d| (meaning 1 days from now, rounded to the second, in other words, the end of the day). If now it is Feb 23rd, "1d|" means Feb 24th at 00:00:00, no matter the time of the day it is.  
+* [number]h|, for example 3h| (meaning 3 hours from now, rounded to the hour. If now it is 16:58 with 15 seconds, "3h|" means 19:00:00 while "3m" means 19:58:15
+* [number]d|, for example 1d| (meaning 1 days from now, rounded to the day, in other words, the end of the day). If now it is Feb 23rd, "1d|" means Feb 24th at 00:00:00, no matter the time of the day it is now.  
 
 Ranges are formed by combining two date "moments", comma separated. For example:
 * 0,1d| Represents the date interval between "now" and the end of the day.
 * -7,0  Represents the last 7 days
-* 1979-02-23 00:30:00,0 Represents the date interval between I was born and now.
+* 1979-02-23 00:30:00,0 Represents the date interval between when I was born and now.
 
-The class is agnostic of timezones, unless for the methods that assume UTC.
+The class is agnostic of timezones, which need to be provided in methods which require them.
 
 A DateRange object can be obtained from an expression by parsing it:
 ```
@@ -166,8 +167,8 @@ DateRangeFactory dateRangeFactory = DateRangeFactory.builder().build();
 
 DateRange range = dateRangeFactory.parseRange("0,30d");
 
-Instant start = range.getStart(ZoneId.of("UTC")); // Returns now (the moment where the dateRangeFactory was created) in UTC. 
-Instant end = range.getEnd(ZoneId.of("UTC")); // Returns now (the moment where the dateRangeFactory was created) + 30 days in UTC.
+Instant start = range.getStart(ZoneId.of("UTC")); // Returns now (the moment where the dateRangeFactory was created) interpreting absolute dates if any in UTC. 
+Instant end = range.getEnd(ZoneId.of("UTC")); // Returns now (the moment where the dateRangeFactory was created) + 30 days, interpreting absolute dates if any in UTC.
 ```
 Operations range.contains() and range.overlaps() can be used to determine if this range includes a specific moment in time or overlaps it.
 
@@ -196,8 +197,9 @@ DateRange eventRange = dateRangeFactory.parseRange("0,2h")
 ZoneId eventTimezone = ZoneId.of("Asia/Tokyo");
 LocalDateTime eventStart = eventRange.getStart(eventTimezone).atZone(eventTimezone).toLocalDateTime();
 LocalDateTime eventEnd = eventRange.getEnd(eventTimezone).atZone(eventTimezone).toLocalDateTime();
-
-// Does this event, or part of it, happen during christmas day?
+```
+Does this event, or part of it, happen during christmas day?
+```
 christmas.overlaps(eventStart, eventEnd, eventTimezone);
 ``` 
 
@@ -208,7 +210,9 @@ Your API may look like:
 
 ` /api/news?fromDate=<xxx>&toDate=<yyy>`
 
-This forces the frontend to know the server timezone for certain use cases. Instead, we can do 
+This forces the frontend to know or assume the server timezone. Or you could pass a unixtime, but this forces the consumers of the API to do timezone calculations. If the timezone is different for every object (for example, a database of events with opening hours, which happen in different physical locations) unixtimes would not be adequate for querying by date (for example, which events happen on Christmas day).
+
+Instead, we can do 
 
 ` /api/news?dateRange=<zzz>`
 
