@@ -92,6 +92,45 @@ try {
 }
 ```
 
+Additionally, class NumericRangeWrapper is provided to build MultipleNumericRange instances which wrap existing collections of numbers, minimizing the total range included.
+
+For example a list of Long's like 1, 2, 3, 4, 5, 10, 20, 22 could be wrapped by:
+
+* One only range[1,22], wich also include multiple numbers not in the original list.
+* A range [1,5][10][20,22] which uses 3 ranges but includes some numbers not in the original list, but not many (only 21)
+* A range [1,5][10][20][22] which uses 4 ranges and represents the exact same sequence as the original.
+
+If a query had to be made to a database, getting only items whose id is in the original list, using a numeric range like this could produce a less complex query.
+
+For example:
+```
+// Obtain list of ID's from an external system
+List<Long> ids = ... 
+//The resulting list contains 1000 id's like, for example
+[1,2,3,4,5...500,502,503, ... 1000,1010]
+
+// Wrap the original list in a range, allowing for the multiple range to contain up to 1000 individual ranges.
+// This, in practice, ensures the range will not contain any other id than the original. 
+// If extra ids would be OK (they could be filtered out afterwards, for example), a smaller maxExpressions could be used.  
+MultipleNumericRange range = numericRangeWrapper.wrapDiscrete(list, NumericRangeWrapper.WrapOptions.builder().maxExpressions(ids.size()).build());
+
+if (range.getRanges().size() < ids.size()) {
+    String rangeAsSQLClause = range.toString(MultipleNumericRange.ToStringCustomizer.sqlCustomizer("x"));
+    # rangeAsSQLClause value is now "(x>=1 AND x<=500) OR (x>=502 AND x<=1000) OR (x=1010)"
+    # This is more compact and efficient than an "in" clause with 1000 id's.
+}
+else {
+    // The original list of id's expressed as a range is not much simpler than the list of id's.
+    // Fallback to an "in" clause.
+    String inClause = " x in (:ids)"; ...
+} 
+```
+
+
+
+ 
+
+
 ### Date range parser <a name="date-range-parser"></a>
 
 Parse a date range expression into a DateRange object which can be used to construct queries, calculate intervals, etc.

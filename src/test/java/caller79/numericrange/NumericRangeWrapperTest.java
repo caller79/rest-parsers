@@ -17,6 +17,22 @@ public class NumericRangeWrapperTest {
     }
 
     @Test
+    public void test1000Ids() {
+        List<Long> list = new ArrayList<>();
+        for (int i = 1; i <= 1000; i++) {
+            if (i != 501) {
+                list.add((long) i);
+            }
+        }
+        list.add(1010L);
+
+        Assert.assertEquals(list.size(), 1000);
+        MultipleNumericRange range = numericRangeWrapper.wrapDiscrete(list, NumericRangeWrapper.WrapOptions.builder().maxExpressions(list.size()).build());
+        String rangeAsSQLQuery = range.toString(MultipleNumericRange.ToStringCustomizer.sqlCustomizer("x"));
+        Assert.assertEquals(rangeAsSQLQuery, "(x>=1 AND x<=500) OR (x>=502 AND x<=1000) OR (x=1010)");
+    }
+
+    @Test
     public void testEmpty() {
         List<Long> list = Collections.emptyList();
         Assert.assertEquals(numericRangeWrapper.wrap(list, getOptions(1)).toString(), "(0,0)");
