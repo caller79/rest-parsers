@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by Carlos Aller on 21/08/19
@@ -48,9 +47,7 @@ public class OrderByClauseParserTest {
                 Assert.assertTrue(previous.getType().compareTo(testBean.getType()) >= 0);
                 if (previous.getType().equals(testBean.getType())) {
                     Assert.assertTrue(previous.getName().compareTo(testBean.getName()) <= 0);
-                    if (previous.getName().equals(testBean.getName())) {
-                        Assert.assertTrue(previous.getId() < (testBean.getId()));
-                    }
+                    Assert.assertTrue(!previous.getName().equals(testBean.getName()) || previous.getId() < (testBean.getId()));
                 }
             }
             previous = testBean;
@@ -65,13 +62,8 @@ public class OrderByClauseParserTest {
             new ReflectionPropertyExtractor<>("id", "name", "type"),
             new DistanceToPropertyExtractor<TestBean>() {
                 @Override
-                protected Double getLatitude(TestBean object) {
-                    return object.getLatitude();
-                }
-
-                @Override
-                protected Double getLongitude(TestBean object) {
-                    return object.getLongitude();
+                protected Point getCoordinates(TestBean object) {
+                    return new Point(object.getLatitude(), object.getLongitude());
                 }
             },
             new RandomPropertyExtractor<TestBean>() {
@@ -91,9 +83,7 @@ public class OrderByClauseParserTest {
                 Assert.assertTrue(previous.getType().compareTo(testBean.getType()) >= 0);
                 if (previous.getType().equals(testBean.getType())) {
                     Assert.assertTrue(previous.getName().compareTo(testBean.getName()) <= 0);
-                    if (previous.getName().equals(testBean.getName())) {
-                        Assert.assertTrue(previous.getId() < (testBean.getId()));
-                    }
+                    Assert.assertTrue(!previous.getName().equals(testBean.getName()) || previous.getId() < (testBean.getId()));
                 }
             }
             previous = testBean;
@@ -151,13 +141,8 @@ public class OrderByClauseParserTest {
         OrderByComparator<TestBean> comparator = new OrderByComparator<>(clause,
             new DistanceToPropertyExtractor<TestBean>() {
                 @Override
-                protected Double getLatitude(TestBean object) {
-                    return object.getLatitude();
-                }
-
-                @Override
-                protected Double getLongitude(TestBean object) {
-                    return object.getLongitude();
+                protected Point getCoordinates(TestBean object) {
+                    return new Point(object.getLatitude(), object.getLongitude());
                 }
             }
         );
@@ -173,13 +158,8 @@ public class OrderByClauseParserTest {
         clause = OrderByClauseParser.parse("distanceTo(1.1:2.2) DESC", "distanceTo(1.1:2.2)"::equals);
         comparator = new OrderByComparator<>(clause, new CombinedPropertyExtractor<>(new DistanceToPropertyExtractor<TestBean>() {
             @Override
-            protected Double getLatitude(TestBean object) {
-                return object.getLatitude();
-            }
-
-            @Override
-            protected Double getLongitude(TestBean object) {
-                return object.getLongitude();
+            protected Point getCoordinates(TestBean object) {
+                return new Point(object.getLatitude(), object.getLongitude());
             }
         }));
         testBeans.sort(comparator);
@@ -296,13 +276,8 @@ public class OrderByClauseParserTest {
             }
 
             @Override
-            protected Double getLatitude(TestBean object) {
-                return object.getLatitude();
-            }
-
-            @Override
-            protected Double getLongitude(TestBean object) {
-                return object.getLongitude();
+            protected Point getCoordinates(TestBean object) {
+                return new Point(object.getLatitude(), object.getLongitude());
             }
         };
 

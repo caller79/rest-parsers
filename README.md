@@ -379,13 +379,8 @@ PropertyExtractor<TestBean> extractor = new CombinedPropertyExtractor<>(
     // support for distanceTo(<point>) function, where we need to be able to provide the coordinates for a given object.
     new DistanceToPropertyExtractor<TestBean>() {
         @Override
-        protected Double getLatitude(TestBean object) {
-            return object.getLatitude();
-        }
-
-        @Override
-        protected Double getLongitude(TestBean object) {
-            return object.getLongitude();
+        protected Point getCoordinates(TestBean object) {
+            return new Point(object.getLatitude(), object.getLongitude());
         }
     },
     // support for a random(<seed>) property, a deterministic pseudorandom sort (given a seed, the sort is predictable).

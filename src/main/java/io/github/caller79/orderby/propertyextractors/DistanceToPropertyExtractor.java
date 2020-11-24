@@ -11,12 +11,12 @@ public abstract class DistanceToPropertyExtractor<T> extends DistanceToPropertyA
 
     @Override
     public Comparable<?> getProperty(T object, String name) {
-        Double objectLat = getLatitude(object);
-        Double objectLon = getLongitude(object);
-
-        if (objectLat == null || objectLon == null) {
+        Point objectPoint = getCoordinates(object);
+        if (objectPoint == null) {
             return Double.MAX_VALUE;
         }
+        double objectLat = objectPoint.getLat();
+        double objectLon = objectPoint.getLng();
 
         DistanceToPropertyParser parser = getParser(name);
         if (!parser.isValid()) {
@@ -27,9 +27,5 @@ public abstract class DistanceToPropertyExtractor<T> extends DistanceToPropertyA
         return point.distanceTo(new Point(objectLat, objectLon)); // Use the fast distance implementation
     }
 
-     // TODO: Change this to one only method getPoint(T object);
-
-    protected abstract Double getLatitude(T object);
-
-    protected abstract Double getLongitude(T object);
+    protected abstract Point getCoordinates(T object);
 }
