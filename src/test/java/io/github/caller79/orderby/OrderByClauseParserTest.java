@@ -68,8 +68,8 @@ public class OrderByClauseParserTest {
             },
             new RandomPropertyExtractor<TestBean>() {
                 @Override
-                protected long getId(TestBean item) {
-                    return item.getId();
+                protected String getId(TestBean item) {
+                    return String.valueOf(item.getId());
                 }
             }
         );
@@ -117,8 +117,8 @@ public class OrderByClauseParserTest {
     public void testSortByRandom() throws ParseException {
         RandomPropertyExtractor<TestBean> extractor = new RandomPropertyExtractor<TestBean>() {
             @Override
-            protected long getId(TestBean item) {
-                return item.getId();
+            protected String getId(TestBean item) {
+                return String.valueOf(item.getId());
             }
         };
         OrderByComparator<TestBean> comparator = new OrderByComparator<>(OrderByClauseParser.parse("random(12a3) ASC", extractor), extractor);

@@ -16,10 +16,9 @@ public abstract class RandomPropertyExtractor<T> extends RandomPropertyAcceptor 
         String seed = "A" + parser.getSeed();
         int multiplier = Math.abs(seed.hashCode() % 10000) + 3;
         int module = 100001;
-        long id = getId(object);
+        long id = getId(object).hashCode();
         return (id * multiplier) % module;
     }
 
-    // TODO make it more generic, use a String for example.
-    protected abstract long getId(T item);
+    protected abstract String getId(T item);
 }
