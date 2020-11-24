@@ -7,7 +7,7 @@ Some simple java utils to make REST APIs powerful and concise
     1. [Numeric range parser](#numeric-range-parser) 
     2. [Date range parser](#date-range-parser) 
     3. [Property setters](#property-setters) 
-
+    4. [Order by parser](#order-by-parser)
 
 ## Introduction <a name="introduction"></a>
 This library provides some useful parsers and classes to help constructing powerful REST APIs. They do not constitute a complete framework or enforce using a specific technology. They have been used and tested with Spring Rest but could potentially work with any other Java Backend technologies.   
@@ -334,3 +334,73 @@ Apply properties from the incoming request into the object.
 helper.applyProperties(bean, updateRequest.getProperties());
 ```
 Validate or persist the resulting object, with hibernate, for example. The PropertiesUpdateRequest could also be validated prior to setting the properties. Basic type validation is already provided out of the box.
+
+
+### Order by parser <a name="order-by-parser"></a>
+
+Helps in parsing SQL-like order by expressions for REST APIs. This utility facilitates creation of read endpoints which return lists of items making it possible to sort them by a variety of criteria.
+For example:
+
+```
+/api/products?orderBy=price+DESC,name+ASC,id
+```
+
+The orderBy parameter would be parsed with a syntax similar to a traditional SQL "ORDER BY" clause, and later be used to create a proper SQL clause or a Comparator which can be used to sort an in-memory collection of objects.
+The utility allows configuration of which properties are valid (in the example above, "price", "name" and "id"), prevents injection, and supports more complex or dynamic expressions, such as functions.
+
+Example:
+
+Simple parse, with a list of allowed properties
+```
+OrderByClause clause = OrderByClauseParser.parse("id ASC, name DESC, whatever DESC", "id", "name", "text", "whatever");
+List<OrderByProperty> properties = clause.getProperties();
+// Every OrderByProperty in the list has a name and a boolean "descending", so it can be used to construct an injection-safe SQL clause.
+```
+
+Simple parse, creating a comparator which can be used to sort objects in a list.
+```
+PropertyExtractor<TestBean> extractor = new ReflectionPropertyExtractor<>("id", "name", "type");
+OrderByClause clause = OrderByClauseParser.parse("type DESC, name ASC, id", extractor);
+OrderByComparator<TestBean> comparator = new OrderByComparator<>(clause, extractor);
+// This comparator can be used to sort a List<TestBean>, assuming TestBean is a java bean class with properties id, name and type.
+```
+
+Complex parse, using some functions.
+
+```
+// We define a extractor which supports multiple properties: 
+//  - id, name, type, as simple reflection properties
+//  - distanceTo(latitude:longitude)
+//  - random(seed)
+
+PropertyExtractor<TestBean> extractor = new CombinedPropertyExtractor<>(
+    // support for simple properties
+    new ReflectionPropertyExtractor<>("id", "name", "type"),
+    // support for distanceTo(<point>) function, where we need to be able to provide the coordinates for a given object.
+    new DistanceToPropertyExtractor<TestBean>() {
+        @Override
+        protected Double getLatitude(TestBean object) {
+            return object.getLatitude();
+        }
+
+        @Override
+        protected Double getLongitude(TestBean object) {
+            return object.getLongitude();
+        }
+    },
+    // support for a random(<seed>) property, a deterministic pseudorandom sort (given a seed, the sort is predictable).
+    // sorting is based in the seed and the id of every object (any unique non-null property)
+    new RandomPropertyExtractor<TestBean>() {
+        @Override
+        protected long getId(TestBean item) {
+            return item.getId();
+        }
+    }
+);
+
+OrderByClause clause = OrderByClauseParser.parse("distanceTo(41.3714289:2.1352135) DESC, random(2aek3)", extractor);
+OrderByComparator<TestBean> comparator = new OrderByComparator<>(clause, extractor);
+// This comparator can be used to sort a List<TestBean> by proximity to given coordinates, and in case of draw, random.
+// Changing the seed, changes the random order. If same seed is passed, same results are obtained.
+```
+
